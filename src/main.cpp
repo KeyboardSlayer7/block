@@ -23,6 +23,12 @@ SOCKET createSocket(const char* host, uint16_t port);
 
 int main(int argc, char* argv[])
 {
+	if (argc < 2)
+	{
+		std::cerr << "Usage: " << argv[0] << " <host>" << std::endl;
+		std::exit(EXIT_FAILURE);
+	}
+
 	WSADATA wsa_data;
 	WORD version = MAKEWORD(2, 2);
 	
@@ -37,7 +43,7 @@ int main(int argc, char* argv[])
 	SOCKADDR_IN dns_server;
 	dns_server.sin_family = AF_INET;
 	dns_server.sin_port = htons(53);
-	inet_pton(AF_INET, "8.8.8.8", &dns_server.sin_addr);
+	inet_pton(AF_INET, argv[1], &dns_server.sin_addr);
 
 	SOCKET sock = createSocket("0.0.0.0", 53);
 
@@ -52,6 +58,9 @@ int main(int argc, char* argv[])
 		int from_len = sizeof(from);
 
 		int bytes = recvfrom(sock, buffer.data(), buffer.size(), 0, (SOCKADDR*)&from, &from_len);
+		
+		inet_ntop(AF_INET, &from.sin_addr, address.data(), IPV4_ADDRESS_LENGTH);
+		std::cout << "Received packet from: " << address.data() << ":" << ntohs(from.sin_port) << "\n";
 
 		DNSHeader header;
 		std::memcpy(&header, buffer.data(), sizeof(DNSHeader));
@@ -63,14 +72,40 @@ int main(int argc, char* argv[])
 		header.num_authority_rrs = htons(header.num_authority_rrs);
 		header.num_additional_rrs = htons(header.num_additional_rrs);
 
-		inet_ntop(AF_INET, &from.sin_addr, address.data(), IPV4_ADDRESS_LENGTH);
+		if (strcmp(address.data(), argv[1]) != 0)
+		{
+			clients[header.transaction_id] = from;
 
-		std::cout << "Received packet from: " << address.data() << ":" << ntohs(from.sin_port) << "\n";
+			sendto(sock, buffer.data(), bytes, 0, (SOCKADDR*)&dns_server, sizeof(dns_server)); 	
+		}
+		else
+		{
+			sendto(sock, buffer.data(), bytes, 0, (SOCKADDR*)&clients.at(header.transaction_id), sizeof(clients.at(header.transaction_id)));
+			clients.erase(header.transaction_id);
+		}
 
-		sendto(sock, buffer.data(), bytes, 0, (SOCKADDR*)&dns_server, sizeof(dns_server)); 
-
-
+		char* data = buffer.data() + sizeof(DNSHeader);
 		
+		int index = 0;
+		
+		while (data[index] != '\0')
+		{
+			uint8_t length = data[index];
+
+			char* section = new char[length + 1];
+			section[length] = '\0';
+	
+			std::memcpy(section, data + index + 1, length);
+
+			index = index + length + 1;
+
+			std::cout << section << ".";
+
+			delete[] section;
+		}	
+
+		std::cout << "\n";
+
 		printDNSHeader(header);
 	}
 
