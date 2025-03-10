@@ -6,7 +6,12 @@ set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(SOURCES 
-	${SOURCE_DIR}/main.cpp)
+	${SOURCE_DIR}/main.cpp
+	${SOURCE_DIR}/server.h
+	${SOURCE_DIR}/server.cpp
+	${SOURCE_DIR}/utils.h
+	${SOURCE_DIR}/utils.cpp		
+)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
