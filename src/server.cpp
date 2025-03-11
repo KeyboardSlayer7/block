@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <array>
 #include <unordered_map>
+#include <fstream>
 
 #include "utils.h"
 #include "server.h"
@@ -34,11 +35,22 @@ void Server::run()
 		inet_ntop(AF_INET, &from.sin_addr, _address.data(), IPV4_ADDRESS_LENGTH);
 		std::cout << "Received packet from: " << _address.data() << ":" << ntohs(from.sin_port) << "\n";
 
-		uint16_t transaction_id;
+		uint16_t transaction_id, num_questions;
+
 		std::memcpy(&transaction_id, _buffer.data(), sizeof(uint16_t));
 		transaction_id = htons(transaction_id);
 
-		/* DNS header is not actually required as the only field that matters is the transation id */
+		std::memcpy(&num_questions, _buffer.data() + sizeof(uint16_t) * 2, sizeof(uint16_t));
+		num_questions = htons(num_questions);
+
+		std::cout << "Transaction ID: " << transaction_id << "\n";
+		std::cout << "Number of questions: " << num_questions << "\n";
+
+		/* 
+		DNS header is not actually required as the only field that matters is the transation id
+		and number of questions.
+		*/
+
 		// DNSHeader header;
 		// std::memcpy(&header, _buffer.data(), sizeof(DNSHeader));
 
@@ -81,10 +93,17 @@ void Server::run()
 			delete[] section;
 		}	
 
-		std::cout << "\n";
+		std::cout << "\n\n";
 
 		// printDNSHeader(header);
 	}
+}
+
+void Server::loadBlacklist(const char* filename)
+{
+	std::ifstream file(filename);
+
+
 }
 
 void Server::setDNSServer(const char* server_address)

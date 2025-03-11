@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <array>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "utils.h"
 
@@ -16,6 +17,7 @@ public:
     ~Server();
     
     void run();
+    void loadBlacklist(const char* filename);
     void setDNSServer(const char* server_address);
 private:
     const char* _dns_server_address;
@@ -27,6 +29,8 @@ private:
     std::array<char, IPV4_ADDRESS_LENGTH> _address;    
 
     bool _running;
+    
+    std::unordered_set<std::string> _blacklist;
 };
 
 #endif // SERVER_H
