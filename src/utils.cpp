@@ -58,9 +58,34 @@ std::vector<char> createBogusQuestion(char* data, int name_len)
 	return question;
 }
 
-std::string getName(char* data)
+DomainName getName(char* data)
 {
-	std::string name;
+	DomainName name;
+
+	int index = 0, encoded_lengths = 0;	
+	
+	while (data[index] != '\0')
+	{
+		uint8_t length = data[index];
+
+		char* section = new char[length + 2];
+		section[length + 1] = '\0';
+
+		std::memcpy(section, data + index + 1, length);
+
+		index = index + length + 1;
+
+		// std::cout << section << ".";
+		section[length] = '.';
+		encoded_lengths++; 
+
+		name.name += section; 	
+
+		delete[] section;
+	}
+
+	name.name.erase(name.name.size() - 1);
+	name.encoded_length = name.name.size() + encoded_lengths;
 	
 	return name;
 }

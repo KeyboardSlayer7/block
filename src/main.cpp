@@ -27,6 +27,7 @@ int main(int argc, char* argv[])
 
 	Server server("0.0.0.0", 53);
 	server.setDNSServer(argv[1]);
+	server.loadBlacklist("blacklist.txt");
 
 	server.run();
 

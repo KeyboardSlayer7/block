@@ -19,10 +19,16 @@ struct DNSHeader
 	uint16_t num_additional_rrs;
 };
 
+struct DomainName
+{
+	size_t encoded_length;
+	std::string name;
+};
+
 void printDNSHeader(const DNSHeader& header);
 SOCKET createSocket(const char* host, uint16_t port);
 
 std::vector<char> createBogusQuestion(char* data, int name_len);
-std::string getName(char* data);
+DomainName getName(char* data);
 
 #endif // UTILS_H
