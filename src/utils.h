@@ -3,6 +3,7 @@
 
 #include <WinSock2.h>
 #include <cstdint>
+#include <vector>
 
 #define DNS_SERVER_PORT 53
 #define KILOBYTE 1024
@@ -20,5 +21,8 @@ struct DNSHeader
 
 void printDNSHeader(const DNSHeader& header);
 SOCKET createSocket(const char* host, uint16_t port);
+
+std::vector<char> createBogusQuestion(char* data, int name_len);
+std::string getName(char* data);
 
 #endif // UTILS_H

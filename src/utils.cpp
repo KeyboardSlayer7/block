@@ -2,6 +2,7 @@
 #include <WS2tcpip.h>
 #include <iostream>
 #include <cstdint>
+#include <vector>
 
 #include "utils.h"
 
@@ -39,4 +40,27 @@ SOCKET createSocket(const char* host, uint16_t port)
 	}
 
 	return sock;
+}
+
+std::vector<char> createBogusQuestion(char* data, int name_len)
+{
+	char bogus_name[] = {7, 'e', 'x', 'a', 'm', 'p', 'l', 'e', 7, 'i', 'n', 'v', 'a', 'l', 'i', 'd', 0};
+	int length = strlen(bogus_name) + 1;
+
+	std::cout << "Bogus length: " << length << "\n";
+
+	std::vector<char> question;
+	question.resize(length + (2 * sizeof(uint16_t)));
+
+	memcpy(question.data(), bogus_name, length);
+	memcpy(question.data() + length, data + name_len, 2 * sizeof(uint16_t));
+	
+	return question;
+}
+
+std::string getName(char* data)
+{
+	std::string name;
+	
+	return name;
 }
